@@ -1,4 +1,4 @@
-# CEDICT 25 August 2007; Copyright 2007; -*- coding: utf-8-dos -*-; Entries: 44782
+## CEDICT 25 August 2007; Copyright 2007; -*- coding: utf-8-dos -*-; Entries: 44782
 呵 呵 [a1] /(phonetic particle)/
 啊 啊 [a1] /(interj.)/ah/
 錒 锕 [a1] /actinium/
