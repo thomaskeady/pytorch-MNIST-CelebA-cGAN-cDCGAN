@@ -161,7 +161,7 @@ transform = transforms.Compose([
 
 data_dir = 'data/processed/cedict_dir'
 
-dest = datasets.ImageFolder(data_dir, transform)
+dset = datasets.ImageFolder(data_dir, transform)
 train_loader = torch.utils.data.DataLoader(dset, batch_size=128, shuffle=True)
 temp = plt.imread(train_loader.dataset.imgs[0][0])
 print(temp.shape)
@@ -227,6 +227,10 @@ for epoch in range(train_epoch):
     y_real_ = torch.ones(batch_size)
     y_fake_ = torch.zeros(batch_size)
     y_real_, y_fake_ = Variable(y_real_.cuda()), Variable(y_fake_.cuda())
+
+    print(fill)
+    count = 0
+
     for x_, y_ in train_loader:
         # train discriminator D
         D.zero_grad()
@@ -238,6 +242,10 @@ for epoch in range(train_epoch):
             y_fake_ = torch.zeros(mini_batch)
             y_real_, y_fake_ = Variable(y_real_.cuda()), Variable(y_fake_.cuda())
 
+        print('\t' + str(count))
+        count = count + 1
+        print(y_[0])
+        print(y_[1])
         y_fill_ = fill[y_]
         x_, y_fill_ = Variable(x_.cuda()), Variable(y_fill_.cuda())
 
