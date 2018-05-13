@@ -14,7 +14,7 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 	count = 0
 	total = 0
 
-	outFile = open('data/raw/cedict_only_singles.txt', 'w')
+	outFile = open('data/processed/cedict_processed.txt', 'w')
 
 	for line in data:
 		total = total + 1
@@ -28,6 +28,7 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 				if ']' in line[i]:
 					count = count + 1
 					chinese = line[0]
+
 					#english = ' '.join(line[i+1:len(line)]).split('/')
 					english = ' '.join(line[i+1:len(line)])
 
@@ -37,12 +38,13 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 					english = re.sub('[^a-zA-Z ]', '', english)
 					#print(english)
 					words = english.split()
+					#print(str(words))
 
 					longest = max(words, key=len)
 
-					print(chinese + ' ' + longest)
+					#print(chinese + ' ' + longest)
 
-					#outFile.write(chinese + ' ' + longest + '\n')
+					outFile.write(chinese + ' ' + longest + '\n')
 					#print(chinese + ' ' + str(words) + ' ' + longest)
 					#print(chinese + ' ' + longest)
 
