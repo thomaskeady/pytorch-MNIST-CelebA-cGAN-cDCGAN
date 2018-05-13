@@ -50,19 +50,23 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 
 					# Delete parenthesis if theres more than one word
 					if len(words) > 1:
-						toRemove = -1;
+						toRemove = []
 
 						for i in range(len(words)-1):
 							if '(' in words[i] or ')' in words[i]:
 								#words.remove(words[i])
-								toRemove = i
+								toRemove.append(i)
 
 							words[i] = re.sub(r'\W', '', words[i])
+							#print(words[i])
 
-						words.remove(words[toRemove])
+						for r in toRemove:
+							words.remove(words[r])
 
 
+						#print(str(words))
 						longest = max(words, key=len)	# This takes the first if multiple with same length
+						#print(longest)
 
 					else:	# If just one, remove parenthesis if they exist
 						if '(' in words[0] or ')' in words[0]:
@@ -71,14 +75,17 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 							longest = words[0]
 
 						longest = re.sub(r'\W', '', longest)
+						#print(longest)
 
 
 					#longest = max(words, key=len)	# This takes the first if multiple with same length
 
 					#print(str(words) + ' ' + longest)
+					#print(longest)
 
 					outFile.write(chinese + ' ' + longest + '\n')
-					print(chinese + ' ' + str(words) + ' ' + longest)
+					#print(chinese + ' ' + str(words) + ' ' + longest)
+					print(chinese + ' ' + longest)
 
 					# Must be last thing in the if statement
 					i = len(line)
