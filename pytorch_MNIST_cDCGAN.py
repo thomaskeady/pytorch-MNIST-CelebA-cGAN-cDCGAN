@@ -147,15 +147,28 @@ lr = 0.0002
 train_epoch = 20
 
 # data_loader
-img_size = 32
+#img_size = 32
+img_size = 64
 transform = transforms.Compose([
-        transforms.Scale(img_size),
+        #transforms.Scale(img_size),
+        transforms.Grayscale(), # Default output channels is 1
         transforms.ToTensor(),
         transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
 ])
-train_loader = torch.utils.data.DataLoader(
-    datasets.MNIST('data', train=True, download=True, transform=transform),
-    batch_size=batch_size, shuffle=True)
+# train_loader = torch.utils.data.DataLoader(
+#     datasets.MNIST('data', train=True, download=True, transform=transform),
+#     batch_size=batch_size, shuffle=True)
+
+data_dir = 'data/processed/cedict_dir'
+
+dest = datasets.ImageFolder(data_dir, transform)
+train_loader = torch.utils.data.DataLoader(dset, batch_size=128, shuffle=True)
+temp = plt.imread(train_loader.dataset.imgs[0][0])
+print(temp.shape)
+if (temp.shape[0] != img_size) or (temp.shape[0] != img_size):
+    sys.stderr.write('Error! image size is not 64 x 64! run \"celebA_data_preprocess.py\" !!!')
+    sys.exit(1)
+
 
 # network
 G = generator(128)
