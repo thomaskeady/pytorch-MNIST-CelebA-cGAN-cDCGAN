@@ -41,41 +41,58 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 
 					english = english.split('/')
 
-					#print(chinese + '\t' + str(english[1]))
+					# #print(chinese + '\t' + str(english[1]))
+					# print(english[1])
+					#
+					# regex = re.compile(".*?\((.*?)\)")
+					# result = re.findall(regex, english[1])
+					# print(result)
+					#
+					# subbed = re.sub(regex, '', english[1])
+					# print(subbed)
+					#
+
+
+
+					#onlyLetters = ' '.join(result.concatenate(subbed))
+					#print(onlyLetters)
 
 					words = english[1].split()	# Take the first definition
 					#print(chinese + '\t' + str(words))
 
 					longest = ''
 
-					# Delete parenthesis if theres more than one word
-					if len(words) > 1:
-						toRemove = []
+					# # Delete parenthesis if theres more than one word
+					# if len(words) > 1:
+					# 	toRemove = []
+					#
+					# 	for i in range(len(words)-1):
+					# 		if '(' in words[i] or ')' in words[i]:
+					# 			#words.remove(words[i])
+					# 			toRemove.append(i)
+					#
+					# 		words[i] = re.sub(r'\W', '', words[i])
+					# 		#print(words[i])
+					#
+					# 	for r in toRemove:
+					# 		words.remove(words[r])
+					#
+					#
+					# 	#print(str(words))
+					# 	longest = max(words, key=len)	# This takes the first if multiple with same length
+					# 	#print(longest)
+					#
+					# else:	# If just one, remove parenthesis if they exist
+					# 	if '(' in words[0] or ')' in words[0]:
+					# 		longest = words[0][1:len(words[0])-1]
+					# 	else:
+					# 		longest = words[0]
+					#
+					# 	longest = re.sub(r'\W', '', longest)
+					# 	#print(longest)
 
-						for i in range(len(words)-1):
-							if '(' in words[i] or ')' in words[i]:
-								#words.remove(words[i])
-								toRemove.append(i)
+					
 
-							words[i] = re.sub(r'\W', '', words[i])
-							#print(words[i])
-
-						for r in toRemove:
-							words.remove(words[r])
-
-
-						#print(str(words))
-						longest = max(words, key=len)	# This takes the first if multiple with same length
-						#print(longest)
-
-					else:	# If just one, remove parenthesis if they exist
-						if '(' in words[0] or ')' in words[0]:
-							longest = words[0][1:len(words[0])-1]
-						else:
-							longest = words[0]
-
-						longest = re.sub(r'\W', '', longest)
-						#print(longest)
 
 
 					#longest = max(words, key=len)	# This takes the first if multiple with same length
@@ -83,7 +100,7 @@ with open('data/raw/cedict_ts_u8.txt', 'r') as data:
 					#print(str(words) + ' ' + longest)
 					#print(longest)
 
-					outFile.write(chinese + ' ' + longest + '\n')
+					#outFile.write(chinese + ' ' + longest + '\n')
 					#print(chinese + ' ' + str(words) + ' ' + longest)
 					print(chinese + ' ' + longest)
 
