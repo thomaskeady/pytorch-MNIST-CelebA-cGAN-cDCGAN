@@ -30,17 +30,22 @@ class CustomDataset(Dataset):
 
     def __init__(self, csv_path, img_path, img_ext, transform=None):
     
-        tmp_df = pd.read_csv(csv_path)
-        assert tmp_df['image_name'].apply(lambda x: os.path.isfile(img_path + x + img_ext)).all(), \
-"Some images referenced in the CSV file were not found"
+        tmp_df = pd.read_csv(csv_path, header=None)
+        targetFile = img_path + tmp_df[0][0] + img_ext;
+        print(targetFile)
+        print(type(tmp_df))
+        #assert tmp_df[0].apply(lambda x: os.path.isfile(targetFile)).all(), \
+#"Some images referenced in the CSV file were not found"
         
         self.mlb = MultiLabelBinarizer()
         self.img_path = img_path
         self.img_ext = img_ext
         self.transform = transform
 
-        self.X_train = tmp_df['image_name']
-        self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        #self.X_train = tmp_df['image_name']
+        self.X_train = tmp_df[0]
+        #self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        self.y_train = self.mlb.fit_transform(str(tmp_df[1:301]).split()).astype(np.float32)
 
     def __getitem__(self, index):
         img = Image.open(self.img_path + self.X_train[index] + self.img_ext)
