@@ -24,7 +24,7 @@ do
     ((NUM+=1))
   done
 
-  mkdir $outputDir/$CODE/
+  #mkdir $outputDir/$CODE/
 
   # Need to install ImageMagick to use this
   # -pointsize flag is font size
