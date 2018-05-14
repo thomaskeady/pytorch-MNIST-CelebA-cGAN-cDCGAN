@@ -62,7 +62,7 @@ class CustomDataset(Dataset):
             #self.X_train = np.append(self.X_train, np.expand_dims(np.array(image), 3))
             #self.X_train[wi] = np.expand_dims(np.array(image), 3)
             self.X_train[:,:,wi] = np.array(image)
-            print('added ' + str(wi) + ' ' + tmp_df[0][wi])
+            #print('added ' + str(wi) + ' ' + tmp_df[0][wi])
             #except Exception as e:
             #    print (e)
 
