@@ -18,17 +18,20 @@ class generator(nn.Module):
     # initializers
     def __init__(self, d=128):
         super(generator, self).__init__()
-        self.deconv1_1 = nn.ConvTranspose2d(100, d*2, 4, 1, 0)
-        self.deconv1_1_bn = nn.BatchNorm2d(d*2)
-        self.deconv1_2 = nn.ConvTranspose2d(10, d*2, 4, 1, 0)
+        self.deconv1_1 = nn.ConvTranspose2d(100, d*4, 4, 1, 0)
+        self.deconv1_1_bn = nn.BatchNorm2d(d*4)
+        self.deconv1_2 = nn.ConvTranspose2d(10, d*4, 4, 1, 0)
         self.deconv1_2_bn = nn.BatchNorm2d(d*2)
-        self.deconv2 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
-        self.deconv2_bn = nn.BatchNorm2d(d*2)
-        self.deconv3 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
-        self.deconv3_bn = nn.BatchNorm2d(d)
-        self.deconv4 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
+        self.deconv2 = nn.ConvTranspose2d(d*8, d*4, 4, 2, 1)
+        self.deconv2_bn = nn.BatchNorm2d(d*4)
+        self.deconv3 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
+        self.deconv3_bn = nn.BatchNorm2d(d*2)
+        #self.deconv4 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
+        self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
 
         self.fc1 = nn.Linear(300, 32768)
+
 
     # weight_init
     def weight_init(self, mean, std):
@@ -42,7 +45,9 @@ class generator(nn.Module):
         print(input.shape)
         print(x.shape)
 
-        y = F.relu(self.deconv1_2_bn(self.deconv1_2(label)))
+        y = F.relu(self.fc1(label))
+
+        #y = F.relu(self.deconv1_2_bn(self.deconv1_2(label)))
         x = torch.cat([x, y], 1)
         x = F.relu(self.deconv2_bn(self.deconv2(x)))
         x = F.relu(self.deconv3_bn(self.deconv3(x)))
@@ -288,13 +293,13 @@ for epoch in range(train_epoch):
 
         D_result = D(x_, y_fill_.float()).squeeze()
 
-        print(D_result.shape)
-        print(y_real_.shape)
+        #print(D_result.shape)
+        #print(y_real_.shape)
 
         D_real_loss = BCE_loss(D_result, y_real_)
 
         z_ = torch.randn((mini_batch, 100)).view(-1, 100, 1, 1)
-        y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
+        y_ = (torch.rand(mini_batch, 1) * 300).type(torch.FloatTensor).squeeze()
         #y_label_ = onehot[y_]
         y_label_ = y_
         y_fill_ = y_
