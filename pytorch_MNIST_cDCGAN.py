@@ -18,19 +18,41 @@ class generator(nn.Module):
     # initializers
     def __init__(self, d=128):
         super(generator, self).__init__()
-        self.deconv1_1 = nn.ConvTranspose2d(100, d*4, 4, 1, 0)
-        self.deconv1_1_bn = nn.BatchNorm2d(d*4)
+        # self.deconv1_1 = nn.ConvTranspose2d(100, d*4, 8, 1, 0)
+        # self.deconv1_1_bn = nn.BatchNorm2d(d*4)
+        # self.deconv1_2 = nn.ConvTranspose2d(10, d*4, 4, 1, 0)
+        # self.deconv1_2_bn = nn.BatchNorm2d(d*2)
+        # self.deconv2 = nn.ConvTranspose2d(d*8, d*4, 4, 2, 1)
+        # self.deconv2_bn = nn.BatchNorm2d(d*4)
+        # self.deconv3 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
+        # self.deconv3_bn = nn.BatchNorm2d(d*2)
+        # #self.deconv4 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
+        # self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        # self.deconv4_bn = nn.BatchNorm2d(d)
+        # self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
+
+        # #self.fc1 = nn.Linear(300, 8192)	# 512*4*4
+        # self.fc1 = nn.Linear(300, 32768)	# 512*8*8
+        # #self.fc1 = nn.Linear(300, 32768*2)	# 512*8*8
+
+        self.deconv1_1 = nn.ConvTranspose2d(100, d*2, 8, 1, 0)
+        self.deconv1_1_bn = nn.BatchNorm2d(d*2)
         self.deconv1_2 = nn.ConvTranspose2d(10, d*4, 4, 1, 0)
         self.deconv1_2_bn = nn.BatchNorm2d(d*2)
-        self.deconv2 = nn.ConvTranspose2d(d*8, d*4, 4, 2, 1)
-        self.deconv2_bn = nn.BatchNorm2d(d*4)
-        self.deconv3 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
-        self.deconv3_bn = nn.BatchNorm2d(d*2)
+        self.deconv2 = nn.ConvTranspose2d(d*4, d*2, 4, 2, 1)
+        self.deconv2_bn = nn.BatchNorm2d(d*2)
+        self.deconv3 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        self.deconv3_bn = nn.BatchNorm2d(d)
         #self.deconv4 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
-        self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        #self.deconv4 = nn.ConvTranspose2d(d*2, d, 4, 2, 1)
+        #self.deconv4_bn = nn.BatchNorm2d(d)
         self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
 
-        self.fc1 = nn.Linear(300, 32768)
+        #self.fc1 = nn.Linear(300, 8192)	# 512*4*4
+        #self.fc1 = nn.Linear(300, 32768)	# 512*8*8
+        self.fc1 = nn.Linear(300, 16384)	# 512*8*8
+        #self.fc1 = nn.Linear(300, 32768*2)	# 512*8*8
+
 
 
     # weight_init
@@ -42,18 +64,26 @@ class generator(nn.Module):
     def forward(self, input, label):
         x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
 
-        print(input.shape)
-        print(x.shape)
+        #print(input.shape)
+        #print(x.shape)
+        #print(label.shape)
 
         y = F.relu(self.fc1(label))
 
         #y = F.relu(self.deconv1_2_bn(self.deconv1_2(label)))
+
+        #y = y.view(-1, 512, 8, 8)
+        y = y.view(-1, 256, 8, 8)
+
+        print(x.shape)
+        print(y.shape)
+
         x = torch.cat([x, y], 1)
         x = F.relu(self.deconv2_bn(self.deconv2(x)))
         x = F.relu(self.deconv3_bn(self.deconv3(x)))
-        x = F.tanh(self.deconv4(x))
-        # x = F.relu(self.deconv4_bn(self.deconv4(x)))
-        # x = F.tanh(self.deconv5(x))
+        #x = F.tanh(self.deconv4(x))
+        #x = F.relu(self.deconv4_bn(self.deconv4(x)))
+        x = F.tanh(self.deconv5(x))
 
         return x
 
@@ -291,6 +321,9 @@ for epoch in range(train_epoch):
         y_fill_ = y_
         x_, y_fill_ = Variable(x_.cuda()), Variable(y_fill_.cuda())
 
+        #print(y_fill_.shape)
+        #print(x_.shape)
+
         D_result = D(x_, y_fill_.float()).squeeze()
 
         #print(D_result.shape)
@@ -299,14 +332,20 @@ for epoch in range(train_epoch):
         D_real_loss = BCE_loss(D_result, y_real_)
 
         z_ = torch.randn((mini_batch, 100)).view(-1, 100, 1, 1)
-        y_ = (torch.rand(mini_batch, 1) * 300).type(torch.FloatTensor).squeeze()
+        y_ = (torch.rand(mini_batch, 300) * 1).type(torch.FloatTensor).squeeze()
         #y_label_ = onehot[y_]
+        #print(y_.shape)
         y_label_ = y_
         y_fill_ = y_
         z_, y_label_, y_fill_ = Variable(z_.cuda()), Variable(y_label_.cuda()), Variable(y_fill_.cuda())
 
+        #print(y_label_.shape)
+
+
         G_result = G(z_, y_label_)
-        D_result = D(G_result, y_fill_).squeeze()
+        #print(G_result.shape)
+
+        D_result = D(G_result, y_fill_.float()).squeeze()
 
         D_fake_loss = BCE_loss(D_result, y_fake_)
         D_fake_score = D_result.data.mean()
