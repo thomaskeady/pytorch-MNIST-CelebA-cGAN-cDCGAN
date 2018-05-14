@@ -49,6 +49,7 @@ class CustomDataset(Dataset):
             self.transform = transform
 
 
+        self.words = tmp_df[0]
         #self.X_train = np.empty([64, 64, 4, len(tmp_df[0])]) # This feels so janky # hardcoding ok because it is custom after all
         self.X_train = np.empty([64, 64, len(tmp_df[0])]) # This feels so janky # hardcoding ok because it is custom after all
         #self.X_train = tmp_df[0]   # X should not be words, shoudl be images
@@ -80,7 +81,7 @@ class CustomDataset(Dataset):
 
 
     def __getitem__(self, index):
-        img = Image.open(self.img_path + self.X_train[index] + self.img_ext)
+        img = Image.open(self.img_path + self.words[index] + self.img_ext)
         img = img.convert('RGB')
         if self.transform is not None:
             img = self.transform(img)
@@ -92,5 +93,6 @@ class CustomDataset(Dataset):
         return img, label
 
     def __len__(self):
-        return len(self.X_train.index)
+        #return len(self.X_train.index)
+        return len(self.X_train)
 

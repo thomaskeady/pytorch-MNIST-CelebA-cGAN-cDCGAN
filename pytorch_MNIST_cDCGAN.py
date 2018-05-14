@@ -50,13 +50,21 @@ class discriminator(nn.Module):
     # initializers
     def __init__(self, d=128):
         super(discriminator, self).__init__()
-        self.conv1_1 = nn.Conv2d(1, int(d/2), 4, 2, 1)
-        self.conv1_2 = nn.Conv2d(10, int(d/2), 4, 2, 1)
-        self.conv2 = nn.Conv2d(d, d*2, 4, 2, 1)
-        self.conv2_bn = nn.BatchNorm2d(d*2)
-        self.conv3 = nn.Conv2d(d*2, d*4, 4, 2, 1)
-        self.conv3_bn = nn.BatchNorm2d(d*4)
-        self.conv4 = nn.Conv2d(d * 4, 1, 4, 1, 0)
+        self.conv1_1 = nn.Conv2d(1, int(d/4), 4, 2, 1)
+        self.conv1_2 = nn.Conv2d(10, int(d/4), 4, 2, 1)
+        self.conv2 = nn.Conv2d(int(d/2), d, 4, 2, 1)
+        self.conv2_bn = nn.BatchNorm2d(d)
+        self.conv3 = nn.Conv2d(d, d*2, 4, 2, 1)
+        self.conv3_bn = nn.BatchNorm2d(d*2)
+        #self.conv4 = nn.Conv2d(d * 2, 1, 4, 1, 0)
+        self.conv4 = nn.Conv2d(d * 2, d*4, 4, 1, 0)
+        self.conv4_bn = nn.BatchNorm2d(d*4)
+        self.conv5 = nn.Conv2d(d * 4, 1, 4, 1, 0)
+
+        #self.fc1 = nn.Linear(300, 16384)	# 16*16*64
+        #self.fc1 = nn.Linear(300, 10240)	# 4*4*10*64
+        #self.fc1 = nn.Linear(300, 4194304)	# 64*64*32*32
+        self.fc1 = nn.Linear(300, 32768)	# 
 
     # weight_init
     def weight_init(self, mean, std):
@@ -66,11 +74,27 @@ class discriminator(nn.Module):
     # forward method
     def forward(self, input, label):
         x = F.leaky_relu(self.conv1_1(input), 0.2)
-        y = F.leaky_relu(self.conv1_2(label), 0.2)
+
+        print(input.shape)
+        print(x.shape)
+
+        y_ = F.leaky_relu(self.fc1(label), 0.2)
+        #y = F.leaky_relu(self.conv1_2(label), 0.2)
+        print(y_.shape)
+
+        y_ = y_.view(64, 32, 32, 32)
+        #y = F.leaky_relu(self.conv1_2(y_), 0.2)
+        y=y_
+
+        #print(x.shape)
+        print(y.shape[0])
+
         x = torch.cat([x, y], 1)
         x = F.leaky_relu(self.conv2_bn(self.conv2(x)), 0.2)
         x = F.leaky_relu(self.conv3_bn(self.conv3(x)), 0.2)
-        x = F.sigmoid(self.conv4(x))
+        x = F.leaky_relu(self.conv4_bn(self.conv4(x)), 0.2)
+        #x = F.sigmoid(self.conv4(x))
+        x = F.sigmoid(self.conv5(x))
 
         return x
 
@@ -206,11 +230,11 @@ train_hist['per_epoch_ptimes'] = []
 train_hist['total_ptime'] = []
 
 # label preprocess
-onehot = torch.zeros(10, 10)
-onehot = onehot.scatter_(1, torch.LongTensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).view(10,1), 1).view(10, 10, 1, 1)
-fill = torch.zeros([10, 10, img_size, img_size])
-for i in range(10):
-    fill[i, i, :, :] = 1
+# onehot = torch.zeros(10, 10)
+# onehot = onehot.scatter_(1, torch.LongTensor([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]).view(10,1), 1).view(10, 10, 1, 1)
+# fill = torch.zeros([10, 10, img_size, img_size])
+# for i in range(10):
+#     fill[i, i, :, :] = 1
 
 print('training start!')
 start_time = time.time()
@@ -234,7 +258,7 @@ for epoch in range(train_epoch):
     y_fake_ = torch.zeros(batch_size)
     y_real_, y_fake_ = Variable(y_real_.cuda()), Variable(y_fake_.cuda())
 
-    print(fill)
+    #print(fill)
     count = 0
 
     for x_, y_ in train_loader:
@@ -250,12 +274,17 @@ for epoch in range(train_epoch):
 
         print('\t' + str(count))
         count = count + 1
-        print(y_[0])
-        print(y_[1])
-        y_fill_ = fill[y_]
+        #print(y_[0])
+        #print(y_[1])
+        #y_fill_ = fill[y_]
+        y_fill_ = y_
         x_, y_fill_ = Variable(x_.cuda()), Variable(y_fill_.cuda())
 
-        D_result = D(x_, y_fill_).squeeze()
+        D_result = D(x_, y_fill_.float()).squeeze()
+
+        print(D_result.shape)
+        print(y_real_.shape)
+
         D_real_loss = BCE_loss(D_result, y_real_)
 
         z_ = torch.randn((mini_batch, 100)).view(-1, 100, 1, 1)
