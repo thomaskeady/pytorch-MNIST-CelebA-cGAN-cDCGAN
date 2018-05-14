@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 inputData="cedict_processed.txt"
-outputDir="cedict_dir"
+outputDir="cedict_dir_v2"
 
 mkdir $outputDir
 
@@ -20,7 +20,7 @@ do
   ((NUM=0))
 
   # If file already exists
-  while [ -f $outputDir/$CODE/$CODE$NUM.png ]; do
+  while [ -f $outputDir/$CODE$NUM.png ]; do
     ((NUM+=1))
   done
 
@@ -32,7 +32,7 @@ do
   # -crop then turns it back into a square image with the character centered
   # We might want to give more padding around the character in the image
   #convert -pointsize 29 -resize 64x90\! -crop 64x64+0+13 -font /System/Library/Fonts/PingFang.ttc label:$CHAR $outputDir/$CODE.png
-  convert -pointsize 29 -resize 64x90\! -crop 64x64+0+13 -negate -font /System/Library/Fonts/PingFang.ttc label:$CHAR $outputDir/$CODE/$CODE$NUM.png
+  convert -pointsize 29 -resize 64x90\! -crop 64x64+0+13 -negate -font /System/Library/Fonts/PingFang.ttc label:$CHAR $outputDir/$CODE$NUM.png
 
 done < "$inputData"
 
