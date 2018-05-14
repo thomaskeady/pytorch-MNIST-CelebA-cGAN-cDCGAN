@@ -10,6 +10,9 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 
+from CustomDataset import CustomDataset
+
+
 # G(z)
 class generator(nn.Module):
     # initializers
@@ -159,10 +162,13 @@ transform = transforms.Compose([
 #     datasets.MNIST('data', train=True, download=True, transform=transform),
 #     batch_size=batch_size, shuffle=True)
 
-data_dir = 'data/processed/cedict_dir'
+img_dir = 'data/processed/cedict_dir_v2/'
+csv_dir = 'data/processed/cedict_vectors_v2.csv'
 
-dset = datasets.ImageFolder(data_dir, transform)
+dset = CustomDataset(csv_dir, img_dir, '.png', transform)
+
 train_loader = torch.utils.data.DataLoader(dset, batch_size=128, shuffle=True)
+
 temp = plt.imread(train_loader.dataset.imgs[0][0])
 print(temp.shape)
 if (temp.shape[0] != img_size) or (temp.shape[0] != img_size):

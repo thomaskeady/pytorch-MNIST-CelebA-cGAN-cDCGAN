@@ -1,6 +1,6 @@
 import pandas as pd
-#from torch import np # Torch wrapper for Numpy
-import numpy as np
+from torch import np # Torch wrapper for Numpy
+#import numpy as np
 
 import os
 from PIL import Image
@@ -33,15 +33,12 @@ class CustomDataset(Dataset):
     
         tmp_df = pd.read_csv(csv_path, header=None)
         targetFile = img_path + tmp_df[0][0] + img_ext;
-        #print(targetFile)
-        #print(type(tmp_df))
-        #assert tmp_df[0].apply(lambda x: os.path.isfile(targetFile)).all(), \
-#"Some images referenced in the CSV file were not found"
         
-        self.mlb = MultiLabelBinarizer()
+        #self.mlb = MultiLabelBinarizer()
         self.img_path = img_path
         self.img_ext = img_ext
-        
+
+
         if transform is None:
             self.transform = transforms.Compose([
                 transforms.Grayscale(), # Default output channels is 1
@@ -52,22 +49,31 @@ class CustomDataset(Dataset):
             self.transform = transform
 
 
-        #self.X_train = tmp_df['image_name']
-        self.X_train = tmp_df[0]
-        #self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
+        #self.X_train = np.empty([64, 64, 4, len(tmp_df[0])]) # This feels so janky # hardcoding ok because it is custom after all
+        self.X_train = np.empty([64, 64, len(tmp_df[0])]) # This feels so janky # hardcoding ok because it is custom after all
+        #self.X_train = tmp_df[0]   # X should not be words, shoudl be images
+        print(self.X_train.shape)
+        #for word in tmp_df[0]:
+        for wi in range(len(tmp_df[0])):
+        #for wi in range(len(tmp_df[0])-1, -1, -1):
+            #image = imageio.imread(img_path + tmp_df[0][wi] + img_ext)
+            image = Image.open(img_path + tmp_df[0][wi] + img_ext).convert('L')
+            #try:
+            #self.X_train = np.append(self.X_train, np.expand_dims(np.array(image), 3))
+            #self.X_train[wi] = np.expand_dims(np.array(image), 3)
+            self.X_train[:,:,wi] = np.array(image)
+            print('added ' + str(wi) + ' ' + tmp_df[0][wi])
+            #except Exception as e:
+            #    print (e)
+
+        #self.X_train = self.X_train[:,:,:,1:]   # Take everything except the first which was just for starting
+
         vectors = tmp_df.loc[:,1:300]
 
-        #print(type(vectors))
-        #print(type(vectors[1][1]))
-        #print(type(vectors.as_matrix()))
-        #print(type(vectors[1][1].as_matrix()))
-
-
-        #self.y_train = self.mlb.fit_transform(str(tmp_df.loc[:,1:301]).split()).astype(np.float32)
-        #self.y_train = tmp_df.loc[:,1:301].values.astype(np.float32)
         self.y_train = vectors.as_matrix()
-        #print(self.y_train.shape)
-        #print(type(self.y_train[0][0]))
+
+        # To make it more like MNIST
+        self.imgs = self.X_train
 
 
 
