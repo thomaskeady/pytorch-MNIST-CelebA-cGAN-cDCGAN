@@ -41,7 +41,16 @@ class CustomDataset(Dataset):
         self.mlb = MultiLabelBinarizer()
         self.img_path = img_path
         self.img_ext = img_ext
-        self.transform = transform
+        
+        if transform is None:
+            self.transform = transforms.Compose([
+                transforms.Grayscale(), # Default output channels is 1
+                transforms.ToTensor(),
+                transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5))
+            ])
+        else:
+            self.transform = transform
+
 
         #self.X_train = tmp_df['image_name']
         self.X_train = tmp_df[0]
@@ -62,13 +71,14 @@ class CustomDataset(Dataset):
 
 
 
+
+
     def __getitem__(self, index):
         img = Image.open(self.img_path + self.X_train[index] + self.img_ext)
         img = img.convert('RGB')
         if self.transform is not None:
             img = self.transform(img)
 
-        #print ('getitem')
         #print(self.y_train[index])
         #print(type(self.y_train[index]))
         #print(type(self.y_train[index][1]))

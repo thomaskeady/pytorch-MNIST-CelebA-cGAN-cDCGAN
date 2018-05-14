@@ -16,8 +16,9 @@ with open('cedict_processed.txt', 'r') as data:
 	with open('cedict_vectors_v2.csv', 'w') as outputFile:
 		for line in data:
 			total += 1
-			word = line.split()[1]
+			word = (line.split()[1]).lower()
 			
+
 			if word in seen:
 				seen[word] += 1
 			else:
