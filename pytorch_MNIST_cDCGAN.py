@@ -64,6 +64,7 @@ class generator(nn.Module):
     def forward(self, input, label):
 
         print(input.shape)
+        print(label.shape)
 
         x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
 
@@ -148,35 +149,41 @@ def normal_init(m, mean, std):
         m.bias.data.zero_()
 
 # fixed noise & label
-temp_z_ = torch.randn(10, 100)
+temp_z_ = torch.randn(8, 100)
 fixed_z_ = temp_z_
-fixed_y_ = torch.zeros(10, 1)
-for i in range(9):
+fixed_y_ = torch.zeros(8, 1)
+for i in range(7):
     fixed_z_ = torch.cat([fixed_z_, temp_z_], 0)
-    temp = torch.ones(10, 1) + i
+    temp = torch.ones(8, 1) + i
     fixed_y_ = torch.cat([fixed_y_, temp], 0)
 
-fixed_z_ = fixed_z_.view(-1, 100, 1, 1)
-fixed_y_label_ = torch.zeros(100, 300)
+#fixed_z_ = fixed_z_.view(-1, 100, 1, 1)
+fixed_z_ = torch.rand(64, 100).view(64, 100, 1, 1)
+fixed_y_label_ = torch.zeros(64, 300)
 #fixed_y_label_.scatter_(1, fixed_y_.type(torch.LongTensor), 1)
-fixed_y_label_ = (torch.rand(100, 300) * 1).type(torch.FloatTensor).squeeze()
-fixed_y_label_ = fixed_y_label_.view(-1, 300, 1, 1)
+fixed_y_label_ = (torch.rand(64, 300) * 1).type(torch.FloatTensor).squeeze()
+#fixed_y_label_ = fixed_y_label_.view(-1, 300, 1, 1)
 fixed_z_, fixed_y_label_ = Variable(fixed_z_.cuda(), volatile=True), Variable(fixed_y_label_.cuda(), volatile=True)
 def show_result(num_epoch, show = False, save = False, path = 'result.png'):
-
+    
     G.eval()
+    # print('fixed')
+    # print(fixed_z_.shape)
+    # print(fixed_y_label_.shape)
+
+
     test_images = G(fixed_z_, fixed_y_label_)
     G.train()
 
-    size_figure_grid = 10
+    size_figure_grid = 8
     fig, ax = plt.subplots(size_figure_grid, size_figure_grid, figsize=(5, 5))
     for i, j in itertools.product(range(size_figure_grid), range(size_figure_grid)):
         ax[i, j].get_xaxis().set_visible(False)
         ax[i, j].get_yaxis().set_visible(False)
 
-    for k in range(10*10):
-        i = k // 10
-        j = k % 10
+    for k in range(8*8):
+        i = k // 8
+        j = k % 8
         ax[i, j].cla()
         ax[i, j].imshow(test_images[k, 0].cpu().data.numpy(), cmap='gray')
 
