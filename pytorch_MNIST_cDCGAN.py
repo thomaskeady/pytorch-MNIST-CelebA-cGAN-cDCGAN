@@ -31,9 +31,9 @@ class generator(nn.Module):
         # self.deconv4_bn = nn.BatchNorm2d(d)
         # self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
 
-        # #self.fc1 = nn.Linear(300, 8192)	# 512*4*4
-        # self.fc1 = nn.Linear(300, 32768)	# 512*8*8
-        # #self.fc1 = nn.Linear(300, 32768*2)	# 512*8*8
+        # #self.fc1 = nn.Linear(300, 8192)    # 512*4*4
+        # self.fc1 = nn.Linear(300, 32768)    # 512*8*8
+        # #self.fc1 = nn.Linear(300, 32768*2)    # 512*8*8
 
         self.deconv1_1 = nn.ConvTranspose2d(100, d*2, 8, 1, 0)
         self.deconv1_1_bn = nn.BatchNorm2d(d*2)
@@ -48,10 +48,10 @@ class generator(nn.Module):
         #self.deconv4_bn = nn.BatchNorm2d(d)
         self.deconv5 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
 
-        #self.fc1 = nn.Linear(300, 8192)	# 512*4*4
-        #self.fc1 = nn.Linear(300, 32768)	# 512*8*8
-        self.fc1 = nn.Linear(300, 16384)	# 512*8*8
-        #self.fc1 = nn.Linear(300, 32768*2)	# 512*8*8
+        #self.fc1 = nn.Linear(300, 8192)    # 512*4*4
+        #self.fc1 = nn.Linear(300, 32768)    # 512*8*8
+        self.fc1 = nn.Linear(300, 16384)    # 512*8*8
+        #self.fc1 = nn.Linear(300, 32768*2)    # 512*8*8
 
 
 
@@ -106,10 +106,10 @@ class discriminator(nn.Module):
         self.conv4_bn = nn.BatchNorm2d(d*4)
         self.conv5 = nn.Conv2d(d * 4, 1, 5, 1, 0)
 
-        #self.fc1 = nn.Linear(300, 16384)	# 16*16*64
-        #self.fc1 = nn.Linear(300, 10240)	# 4*4*10*64
-        #self.fc1 = nn.Linear(300, 4194304)	# 64*64*32*32
-        self.fc1 = nn.Linear(300, 32768)	# 
+        #self.fc1 = nn.Linear(300, 16384)    # 16*16*64
+        #self.fc1 = nn.Linear(300, 10240)    # 4*4*10*64
+        #self.fc1 = nn.Linear(300, 4194304)    # 64*64*32*32
+        self.fc1 = nn.Linear(300, 32768)    # 
 
     # weight_init
     def weight_init(self, mean, std):
@@ -223,7 +223,7 @@ def show_train_hist(hist, show = False, save = False, path = 'Train_hist.png'):
 # training parameters
 batch_size = 128
 lr = 0.0002
-train_epoch = 20
+train_epoch = 100
 
 # data_loader
 #img_size = 32
@@ -288,6 +288,16 @@ train_hist['total_ptime'] = []
 # for i in range(10):
 #     fill[i, i, :, :] = 1
 
+# Train D if its loss is greater than this
+D_loss_thresh = 10
+train_D = True
+
+
+# Train G if its loss is greater than this
+G_loss_thresh = 10
+train_G = True
+
+
 print('training start!')
 start_time = time.time()
 for epoch in range(train_epoch):
@@ -318,7 +328,7 @@ for epoch in range(train_epoch):
 
         #print(x_.shape)
         #print(y_.shape)
-        y_ = torch.ones(y_.shape)
+        #y_ = torch.ones(y_.shape)    # Consistent conditions for tseting
 
         D.zero_grad()
 
@@ -369,13 +379,17 @@ for epoch in range(train_epoch):
         D_train_loss = D_real_loss + D_fake_loss
 
         D_train_loss.backward()
-        D_optimizer.step()
+
+        if train_D:
+            D_optimizer.step()
 
         D_losses.append(D_train_loss.data[0])
 
 
         # for f in D.parameters():
-        #     print(f.grad)        	
+        #     print(f.grad)            
+
+
 
         # train generator G
         G.zero_grad()
@@ -392,16 +406,34 @@ for epoch in range(train_epoch):
 
         G_train_loss = BCE_loss(D_result, y_real_)
 
+        
         G_train_loss.backward()
-        G_optimizer.step()
+        if train_G:
+            G_optimizer.step()
 
         G_losses.append(G_train_loss.data[0])
+
+
 
     epoch_end_time = time.time()
     per_epoch_ptime = epoch_end_time - epoch_start_time
 
     print('[%d/%d] - ptime: %.2f, loss_d: %.3f, loss_g: %.3f' % ((epoch + 1), train_epoch, per_epoch_ptime, torch.mean(torch.FloatTensor(D_losses)),
                                                               torch.mean(torch.FloatTensor(G_losses))))
+
+    if torch.mean(torch.FloatTensor(D_losses)) > D_loss_thresh:
+        train_D = True
+    else:
+        train_D = False
+
+    if torch.mean(torch.FloatTensor(G_losses)) > G_loss_thresh:
+        train_G = True
+    else:
+        train_G = False
+    
+    print('Training D: ' + str(train_D) + '\tTraining G: ' + str(train_G))
+
+
     fixed_p = root + 'Fixed_results/' + model + str(epoch + 1) + '.png'
     show_result((epoch+1), save=True, path=fixed_p)
     train_hist['D_losses'].append(torch.mean(torch.FloatTensor(D_losses)))
