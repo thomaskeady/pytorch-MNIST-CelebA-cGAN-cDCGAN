@@ -45,14 +45,17 @@ class CustomDataset(Dataset):
         #self.X_train = tmp_df['image_name']
         self.X_train = tmp_df[0]
         #self.y_train = self.mlb.fit_transform(tmp_df['tags'].str.split()).astype(np.float32)
-        self.y_train = self.mlb.fit_transform(str(tmp_df[1:301]).split()).astype(np.float32)
+        print(tmp_df.loc[:,1:301].shape)
+        #self.y_train = self.mlb.fit_transform(str(tmp_df.loc[:,1:301]).split()).astype(np.float32)
+        self.y_train = tmp_df.loc[:,1:301]
+        print(self.y_train.shape)
 
     def __getitem__(self, index):
         img = Image.open(self.img_path + self.X_train[index] + self.img_ext)
         img = img.convert('RGB')
         if self.transform is not None:
             img = self.transform(img)
-        
+
         label = torch.from_numpy(self.y_train[index])
         return img, label
 
