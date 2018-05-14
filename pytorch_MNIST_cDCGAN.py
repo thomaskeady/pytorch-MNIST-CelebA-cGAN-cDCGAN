@@ -66,13 +66,13 @@ class generator(nn.Module):
         #print(input.shape)
         #print(label.shape)
 
-        x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
+        x = F.leaky_relu(self.deconv1_1_bn(self.deconv1_1(input)))
 
         #print(input.shape)
         #print(x.shape)
         #print(label.shape)
 
-        y = F.relu(self.fc1(label))
+        y = F.leaky_relu(self.fc1(label))
 
         #y = F.relu(self.deconv1_2_bn(self.deconv1_2(label)))
 
@@ -83,8 +83,8 @@ class generator(nn.Module):
         #print(y.shape)
 
         x = torch.cat([x, y], 1)
-        x = F.relu(self.deconv2_bn(self.deconv2(x)))
-        x = F.relu(self.deconv3_bn(self.deconv3(x)))
+        x = F.leaky_relu(self.deconv2_bn(self.deconv2(x)))
+        x = F.leaky_relu(self.deconv3_bn(self.deconv3(x)))
         #x = F.tanh(self.deconv4(x))
         #x = F.relu(self.deconv4_bn(self.deconv4(x)))
         x = F.tanh(self.deconv5(x))
@@ -223,7 +223,7 @@ def show_train_hist(hist, show = False, save = False, path = 'Train_hist.png'):
 # training parameters
 batch_size = 128
 lr = 0.0002
-train_epoch = 50
+train_epoch = 20
 
 # data_loader
 #img_size = 32
@@ -315,6 +315,11 @@ for epoch in range(train_epoch):
 
     for x_, y_ in train_loader:
         # train discriminator D
+
+        print(x_.shape)
+        print(y_.shape)
+        y_ = torch.ones(y_.shape)
+
         D.zero_grad()
 
         mini_batch = x_.size()[0]
@@ -337,7 +342,7 @@ for epoch in range(train_epoch):
 
         D_result = D(x_, y_fill_.float()).squeeze()
 
-        #print(D_result.shape)
+        print(D_result.shape)
         #print(y_real_.shape)
 
         D_real_loss = BCE_loss(D_result, y_real_)
@@ -354,7 +359,7 @@ for epoch in range(train_epoch):
 
 
         G_result = G(z_, y_label_)
-        #print(G_result.shape)
+        print(G_result.shape)
 
         D_result = D(G_result, y_fill_.float()).squeeze()
 
