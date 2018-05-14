@@ -63,8 +63,8 @@ class generator(nn.Module):
     # forward method
     def forward(self, input, label):
 
-        print(input.shape)
-        print(label.shape)
+        #print(input.shape)
+        #print(label.shape)
 
         x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
 
@@ -223,7 +223,7 @@ def show_train_hist(hist, show = False, save = False, path = 'Train_hist.png'):
 # training parameters
 batch_size = 128
 lr = 0.0002
-train_epoch = 20
+train_epoch = 50
 
 # data_loader
 #img_size = 32
@@ -324,7 +324,7 @@ for epoch in range(train_epoch):
             y_fake_ = torch.zeros(mini_batch)
             y_real_, y_fake_ = Variable(y_real_.cuda()), Variable(y_fake_.cuda())
 
-        print('\t' + str(count))
+        #print('\t' + str(count))
         count = count + 1
         #print(y_[0])
         #print(y_[1])
