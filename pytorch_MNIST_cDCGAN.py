@@ -62,6 +62,9 @@ class generator(nn.Module):
 
     # forward method
     def forward(self, input, label):
+
+        print(input.shape)
+
         x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
 
         #print(input.shape)
@@ -75,8 +78,8 @@ class generator(nn.Module):
         #y = y.view(-1, 512, 8, 8)
         y = y.view(-1, 256, 8, 8)
 
-        print(x.shape)
-        print(y.shape)
+        #print(x.shape)
+        #print(y.shape)
 
         x = torch.cat([x, y], 1)
         x = F.relu(self.deconv2_bn(self.deconv2(x)))
@@ -154,9 +157,10 @@ for i in range(9):
     fixed_y_ = torch.cat([fixed_y_, temp], 0)
 
 fixed_z_ = fixed_z_.view(-1, 100, 1, 1)
-fixed_y_label_ = torch.zeros(100, 10)
-fixed_y_label_.scatter_(1, fixed_y_.type(torch.LongTensor), 1)
-fixed_y_label_ = fixed_y_label_.view(-1, 10, 1, 1)
+fixed_y_label_ = torch.zeros(100, 300)
+#fixed_y_label_.scatter_(1, fixed_y_.type(torch.LongTensor), 1)
+fixed_y_label_ = (torch.rand(100, 300) * 1).type(torch.FloatTensor).squeeze()
+fixed_y_label_ = fixed_y_label_.view(-1, 300, 1, 1)
 fixed_z_, fixed_y_label_ = Variable(fixed_z_.cuda(), volatile=True), Variable(fixed_y_label_.cuda(), volatile=True)
 def show_result(num_epoch, show = False, save = False, path = 'result.png'):
 
@@ -361,9 +365,10 @@ for epoch in range(train_epoch):
         G.zero_grad()
 
         z_ = torch.randn((mini_batch, 100)).view(-1, 100, 1, 1)
-        y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
-        y_label_ = onehot[y_]
-        y_fill_ = fill[y_]
+        #y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
+        y_ = (torch.rand(mini_batch, 300) * 1).type(torch.FloatTensor).squeeze()
+        y_label_ = y_
+        y_fill_ = y_
         z_, y_label_, y_fill_ = Variable(z_.cuda()), Variable(y_label_.cuda()), Variable(y_fill_.cuda())
 
         G_result = G(z_, y_label_)
