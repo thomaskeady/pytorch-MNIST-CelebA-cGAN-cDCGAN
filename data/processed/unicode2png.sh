@@ -12,7 +12,7 @@ do
 
   # Premature optimization is the root of all evil
   CHAR="$(echo "$LINE"| awk '{print $1}')"
-  CODE="$(echo "$LINE"| awk '{print $2}')"
+  CODE="$(echo "$LINE"| awk '{print tolower($2)}')"
 
   #echo $CODE
   echo $CHAR

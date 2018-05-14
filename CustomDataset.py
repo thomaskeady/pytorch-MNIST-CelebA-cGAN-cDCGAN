@@ -57,8 +57,8 @@ class CustomDataset(Dataset):
         #self.y_train = self.mlb.fit_transform(str(tmp_df.loc[:,1:301]).split()).astype(np.float32)
         #self.y_train = tmp_df.loc[:,1:301].values.astype(np.float32)
         self.y_train = vectors.as_matrix()
-        print(self.y_train.shape)
-        print(type(self.y_train[0][0]))
+        #print(self.y_train.shape)
+        #print(type(self.y_train[0][0]))
 
 
 
@@ -68,10 +68,10 @@ class CustomDataset(Dataset):
         if self.transform is not None:
             img = self.transform(img)
 
-        print ('getitem')
-        print(self.y_train[index])
-        print(type(self.y_train[index]))
-        print(type(self.y_train[index][1]))
+        #print ('getitem')
+        #print(self.y_train[index])
+        #print(type(self.y_train[index]))
+        #print(type(self.y_train[index][1]))
         label = torch.from_numpy(self.y_train[index])
         return img, label
 
