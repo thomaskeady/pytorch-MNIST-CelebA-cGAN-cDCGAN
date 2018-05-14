@@ -316,8 +316,8 @@ for epoch in range(train_epoch):
     for x_, y_ in train_loader:
         # train discriminator D
 
-        print(x_.shape)
-        print(y_.shape)
+        #print(x_.shape)
+        #print(y_.shape)
         y_ = torch.ones(y_.shape)
 
         D.zero_grad()
@@ -342,7 +342,7 @@ for epoch in range(train_epoch):
 
         D_result = D(x_, y_fill_.float()).squeeze()
 
-        print(D_result.shape)
+        #print(D_result.shape)
         #print(y_real_.shape)
 
         D_real_loss = BCE_loss(D_result, y_real_)
@@ -359,7 +359,7 @@ for epoch in range(train_epoch):
 
 
         G_result = G(z_, y_label_)
-        print(G_result.shape)
+        #print(G_result.shape)
 
         D_result = D(G_result, y_fill_.float()).squeeze()
 
@@ -372,6 +372,10 @@ for epoch in range(train_epoch):
         D_optimizer.step()
 
         D_losses.append(D_train_loss.data[0])
+
+
+        # for f in D.parameters():
+        #     print(f.grad)        	
 
         # train generator G
         G.zero_grad()
