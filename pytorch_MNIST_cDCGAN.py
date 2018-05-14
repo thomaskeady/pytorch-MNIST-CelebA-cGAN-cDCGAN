@@ -28,6 +28,8 @@ class generator(nn.Module):
         self.deconv3_bn = nn.BatchNorm2d(d)
         self.deconv4 = nn.ConvTranspose2d(d, 1, 4, 2, 1)
 
+        self.fc1 = nn.Linear(300, 32768)
+
     # weight_init
     def weight_init(self, mean, std):
         for m in self._modules:
@@ -36,6 +38,10 @@ class generator(nn.Module):
     # forward method
     def forward(self, input, label):
         x = F.relu(self.deconv1_1_bn(self.deconv1_1(input)))
+
+        print(input.shape)
+        print(x.shape)
+
         y = F.relu(self.deconv1_2_bn(self.deconv1_2(label)))
         x = torch.cat([x, y], 1)
         x = F.relu(self.deconv2_bn(self.deconv2(x)))
@@ -59,7 +65,7 @@ class discriminator(nn.Module):
         #self.conv4 = nn.Conv2d(d * 2, 1, 4, 1, 0)
         self.conv4 = nn.Conv2d(d * 2, d*4, 4, 1, 0)
         self.conv4_bn = nn.BatchNorm2d(d*4)
-        self.conv5 = nn.Conv2d(d * 4, 1, 4, 1, 0)
+        self.conv5 = nn.Conv2d(d * 4, 1, 5, 1, 0)
 
         #self.fc1 = nn.Linear(300, 16384)	# 16*16*64
         #self.fc1 = nn.Linear(300, 10240)	# 4*4*10*64
@@ -75,19 +81,19 @@ class discriminator(nn.Module):
     def forward(self, input, label):
         x = F.leaky_relu(self.conv1_1(input), 0.2)
 
-        print(input.shape)
-        print(x.shape)
+        #print(input.shape)
+        #print(x.shape)
 
         y_ = F.leaky_relu(self.fc1(label), 0.2)
         #y = F.leaky_relu(self.conv1_2(label), 0.2)
-        print(y_.shape)
+        #print(y_.shape)
 
         y_ = y_.view(64, 32, 32, 32)
         #y = F.leaky_relu(self.conv1_2(y_), 0.2)
         y=y_
 
         #print(x.shape)
-        print(y.shape[0])
+        #print(y.shape[0])
 
         x = torch.cat([x, y], 1)
         x = F.leaky_relu(self.conv2_bn(self.conv2(x)), 0.2)
@@ -289,8 +295,9 @@ for epoch in range(train_epoch):
 
         z_ = torch.randn((mini_batch, 100)).view(-1, 100, 1, 1)
         y_ = (torch.rand(mini_batch, 1) * 10).type(torch.LongTensor).squeeze()
-        y_label_ = onehot[y_]
-        y_fill_ = fill[y_]
+        #y_label_ = onehot[y_]
+        y_label_ = y_
+        y_fill_ = y_
         z_, y_label_, y_fill_ = Variable(z_.cuda()), Variable(y_label_.cuda()), Variable(y_fill_.cuda())
 
         G_result = G(z_, y_label_)
