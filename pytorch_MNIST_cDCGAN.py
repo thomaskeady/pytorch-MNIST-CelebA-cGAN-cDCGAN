@@ -12,6 +12,7 @@ from torch.autograd import Variable
 
 from CustomDataset import CustomDataset
 
+from torchviz import make_dot
 
 # G(z)
 class generator(nn.Module):
@@ -222,7 +223,8 @@ def show_train_hist(hist, show = False, save = False, path = 'Train_hist.png'):
 
 # training parameters
 batch_size = 128
-lr = 0.0002
+G_lr = 0.002
+D_lr = 0.0002
 train_epoch = 100
 
 # data_loader
@@ -264,8 +266,8 @@ D.cuda()
 BCE_loss = nn.BCELoss()
 
 # Adam optimizer
-G_optimizer = optim.Adam(G.parameters(), lr=lr, betas=(0.5, 0.999))
-D_optimizer = optim.Adam(D.parameters(), lr=lr, betas=(0.5, 0.999))
+G_optimizer = optim.Adam(G.parameters(), lr=G_lr, betas=(0.5, 0.999))
+D_optimizer = optim.Adam(D.parameters(), lr=D_lr, betas=(0.5, 0.999))
 
 # results save folder
 root = 'MNIST_cDCGAN_results/'
@@ -290,12 +292,23 @@ train_hist['total_ptime'] = []
 
 # Train D if its loss is greater than this
 D_loss_thresh = 10
-train_D = True
+train_D = False
 
 
 # Train G if its loss is greater than this
-G_loss_thresh = 10
+G_loss_thresh = 4
 train_G = True
+
+
+# print('Trying to make_dot')
+
+# noisex = torch.randn(100, 100, 64, 64)
+# noisey = torch.randn(100, 300)
+# y = G(Variable(noisex.cuda()), Variable(noisey.cuda()))
+# img = make_dot(y)
+# g.view()
+
+
 
 
 print('training start!')
@@ -352,6 +365,7 @@ for epoch in range(train_epoch):
 
         D_result = D(x_, y_fill_.float()).squeeze()
 
+        make_dot(D_result)
         #print(D_result.shape)
         #print(y_real_.shape)
 
@@ -370,6 +384,10 @@ for epoch in range(train_epoch):
 
         G_result = G(z_, y_label_)
         #print(G_result.shape)
+
+        lg = make_dot(G_result)
+        lg.view()
+
 
         D_result = D(G_result, y_fill_.float()).squeeze()
 

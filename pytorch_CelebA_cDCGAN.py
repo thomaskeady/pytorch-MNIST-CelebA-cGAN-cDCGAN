@@ -314,7 +314,8 @@ for epoch in range(train_epoch):
         z_, y_label_, y_fill_ = Variable(z_.cuda()), Variable(y_label_.cuda()), Variable(y_fill_.cuda())
 
         G_result = G(z_, y_label_)
-        D_result = D(G_result, y_fill_).squeeze()
+        D_result = D(G_result, y_fill_)
+
 
         D_fake_loss = BCE_loss(D_result, y_fake_)
         D_fake_score = D_result.data.mean()
